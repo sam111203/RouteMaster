@@ -1,9 +1,8 @@
-import 'package:authentication/main.dart';
 import 'package:authentication/signuppage.dart';
 import 'package:authentication/uihelper.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-
+import 'prehomepage.dart';
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
 
@@ -26,7 +25,7 @@ class _LoginPageState extends State<LoginPage> {
           Navigator.push(
               context,
               MaterialPageRoute(
-                  builder: (context) => MyHomePage(title: "Login")));
+                  builder: (context) => HomePage()));
         });
       } on FirebaseAuthException catch (ex) {
         return UiHelper.CustomAlertBox(context, ex.code.toString());

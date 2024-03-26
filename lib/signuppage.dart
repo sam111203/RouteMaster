@@ -1,6 +1,7 @@
 // ignore_for_file: prefer_const_constructors
 
 import 'package:authentication/main.dart';
+import 'package:authentication/prehomepage.dart';
 import 'package:authentication/uihelper.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -28,7 +29,7 @@ class _SignUpPageState extends State<SignUpPage> {
           Navigator.push(
               context,
               MaterialPageRoute(
-                  builder: (context) => MyHomePage(title: "HomePage")));
+                  builder: (context) => HomePage()));
         });
       } on FirebaseAuthException catch (ex) {
         // ignore: use_build_context_synchronously
