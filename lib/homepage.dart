@@ -1,12 +1,11 @@
 import 'dart:async';
-
-import 'package:authentication/prehomepage.dart';
+import 'package:flutter_polyline_points/flutter_polyline_points.dart';
+import 'prehomepage.dart';
 import 'package:authentication/test.dart';
 import 'package:flutter/material.dart';
-import 'main.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
-import 'loginpage.dart';
+
 Position? _currentLocation;
 late bool servicePermission = false;
 late LocationPermission permission;
@@ -28,7 +27,8 @@ class _MyHomePageState extends State<MyHomePage> {
   CameraPosition _kGooglePlex = CameraPosition(target: LatLng(19.122273,72.917255),zoom: 14,);
 
   final Set<Marker> _markers = {};
-  //final Set<Polyline> _polyline={};
+  final Set<Polyline> _polyline={};
+  //Map<PolylineId,Polyline> polylines = {};
 
   Future<Position> _getCurrentLocation() async {
     servicePermission = await Geolocator.isLocationServiceEnabled();
@@ -57,8 +57,8 @@ class _MyHomePageState extends State<MyHomePage> {
           zoom: 14,
         );
         latlng = [
-          LatLng(startlatitude!, startlongitude!),
-          LatLng(19.045450783843958, 72.841676266985),
+          LatLng(sourcelat!,sourcelong!),  //LatLng(startlatitude!, startlongitude!),
+          LatLng(destinationlat!,destinationlong!),
         ];
         _markers.clear();
         for(int i=0;i<latlng.length;i++){
@@ -84,23 +84,25 @@ class _MyHomePageState extends State<MyHomePage> {
                   ),
                   icon: BitmapDescriptor.defaultMarker,
                 )
+
             );
+
           }
+
           setState(() {
 
           });
-          /*_polyline.add(
+
+          _polyline.add(
             Polyline(polylineId: PolylineId("1"),
                 points: latlng,
                 color: Colors.red,
                 width: 3
             ),
-          );*/
+          );
         }
       });
     });
-
-
 
   }
   @override
@@ -143,7 +145,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 _controller.complete(controller);
               },
               myLocationEnabled: true,
-              // polylines: _polyline,
+              //polylines: Set<Polyline>.of(polylines.values),
               initialCameraPosition: _kGooglePlex,
               mapType: MapType.normal,
             ),

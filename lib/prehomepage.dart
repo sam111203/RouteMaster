@@ -1,12 +1,12 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
+import 'package:geocoding/geocoding.dart';
 import 'package:uuid/uuid.dart';
 import 'homepage.dart';
 import 'package:http/http.dart' as http;
 
 final String apiKey = 'AIzaSyDm-MaPLtStPAEPLi-nQ2_DAgh24BRGH14';
-
+double sourcelat = 0.0,sourcelong=0.0,destinationlat=0.0,destinationlong=0.0;
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
@@ -19,16 +19,22 @@ class _HomePageState extends State<HomePage> {
   TextEditingController _controller2 = TextEditingController();
   var uuid = Uuid();
   String _sessionToken = '12';
+  String _sessionToken1 = '34';
   List<dynamic> _placesList = [];
+  List<dynamic> _placesList1 = [];
   String selectedItem = '';
-  bool showListView = false; // Flag to control the visibility of ListView.builder
-
+  bool showListView = false;// Flag to control the visibility of ListView.builder
+  bool showListView1 = false;// Flag to control the visibility of ListView.builder
+  
   @override
   void initState() {
     super.initState();
 
     _controller1.addListener(() {
       onChange();
+    });
+    _controller2.addListener(() {
+      onChange1();
     });
   }
 
@@ -42,6 +48,15 @@ class _HomePageState extends State<HomePage> {
     getSuggestion(_controller1.text);
   }
 
+  void onChange1() {
+    if (_sessionToken1 == null) {
+      setState(() {
+        _sessionToken1 = uuid.v4();
+      });
+    }
+
+    getSuggestion1(_controller2.text);
+  }
   void getSuggestion(String input) async {
     String baseURL =
         'https://maps.googleapis.com/maps/api/place/autocomplete/json';
@@ -54,8 +69,13 @@ class _HomePageState extends State<HomePage> {
     print(data);
     print(response.body.toString());
     if (response.statusCode == 200) {
-      setState(() {
+      setState(() async{
         _placesList = jsonDecode(response.body.toString())['predictions'];
+        List<Location> locations1 = await locationFromAddress(_placesList[0] ['description']);
+        sourcelat = locations1.last.latitude;
+        print(sourcelat);
+        sourcelong = locations1.last.longitude;
+        print(sourcelong);
         showListView = true; // Show ListView.builder when suggestions are loaded
       });
     } else {
@@ -63,6 +83,32 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  void getSuggestion1(String input) async {
+    String baseURL =
+        'https://maps.googleapis.com/maps/api/place/autocomplete/json';
+    String request =
+        '$baseURL?input=$input&key=$apiKey&sessiontoken=$_sessionToken1';
+
+    var response1 = await http.get(Uri.parse(request));
+    var data1 = response1.body.toString();
+    print('data');
+    print(data1);
+    print(response1.body.toString());
+
+    if (response1.statusCode == 200) {
+      _placesList1 = jsonDecode(response1.body.toString())['predictions'];
+      List<Location> locations = await locationFromAddress(_placesList1[0] ['description']);
+      setState(() {
+        destinationlat = locations.last.latitude;
+        print(destinationlat);
+        destinationlong = locations.last.longitude;
+        print(destinationlong);
+        showListView1 = true; // Show ListView.builder when suggestions are loaded
+      });
+    } else {
+      throw Exception('Failed to load data');
+    }
+  }
   int _selectedIndex = 0;
   void _onItemTapped(int index) {
     setState(() {
@@ -120,7 +166,7 @@ class _HomePageState extends State<HomePage> {
                       return ListTile(
                         onTap: () {
                           setState(() {
-                            showListView = false; // Hide ListView.builder after selection
+                            //showListView = false; // Hide ListView.builder after selection
                             _controller1.text =
                                 _placesList[index]['description'].toString();
                           });
@@ -143,6 +189,23 @@ class _HomePageState extends State<HomePage> {
                     },
                     icon: Icon(Icons.clear),
                   ),
+                ),
+              ),
+              Expanded(
+                child: ListView.builder(
+                  itemCount: _placesList1.length,
+                  itemBuilder: (context, index) {
+                    return ListTile(
+                      onTap: () {
+                        setState(() {
+                          //showListView1 = false; // Hide ListView.builder after selection
+                          _controller2.text =
+                              _placesList1[index]['description'].toString();
+                        });
+                      },
+                      title: Text(_placesList1[index]['description']),
+                    );
+                  },
                 ),
               ),
             ],
