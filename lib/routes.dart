@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
-import 'package:flutter_polyline_points/flutter_polyline_points.dart';
+import 'package:authentication/ticketing.dart';
+
 import 'prehomepage.dart';
 import 'package:authentication/test.dart';
 import 'package:flutter/material.dart';
@@ -12,18 +13,18 @@ Position? _currentLocation;
 late bool servicePermission = false;
 late LocationPermission permission;
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({Key? key, required String title}) : super(key: key);
+class RouteDisplay extends StatefulWidget {
+  const RouteDisplay({Key? key}) : super(key: key);
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  State<RouteDisplay> createState() => _RouteDisplayState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class _RouteDisplayState extends State<RouteDisplay> {
   Completer<GoogleMapController> _controller = Completer();
 
   CameraPosition _kGooglePlex =
-  CameraPosition(target: LatLng(sourcelat, sourcelong,), zoom:14 );
+  CameraPosition(target: LatLng(sourcelat, sourcelong), zoom: 14);
 
   final Set<Marker> _markers = {};
   final Set<Polyline> _polyline = {};
@@ -45,7 +46,8 @@ class _MyHomePageState extends State<MyHomePage> {
   Future<void> _getPolylineCoordinates(LatLng origin, LatLng destination) async {
     String apiKey = 'AIzaSyDm-MaPLtStPAEPLi-nQ2_DAgh24BRGH14'; // Replace with your actual API key
     String url =
-        'https://maps.googleapis.com/maps/api/directions/json?origin=${origin.latitude},${origin.longitude}&destination=${destination.latitude},${destination.longitude}&travel_mode=transit&key=$apiKey';
+        'https://maps.googleapis.com/maps/api/directions/json?origin=${origin.latitude},${origin.longitude}&destination=${destination.latitude},${destination.longitude}&key=$apiKey';
+
     final response = await http.get(Uri.parse(url));
 
     if (response.statusCode == 200) {
@@ -67,7 +69,7 @@ class _MyHomePageState extends State<MyHomePage> {
           Polyline(
             polylineId: PolylineId("1"),
             points: polylineCoordinates,
-            color: Colors.purple,
+            color: Colors.blue,
             width: 3,
           ),
         );
@@ -124,8 +126,8 @@ class _MyHomePageState extends State<MyHomePage> {
           zoom: 14,
         );
         latlng = [
-          LatLng(sourcelat!, sourcelong!),
-          LatLng(destinationlat!, destinationlong!),
+          LatLng(sourcelat!,sourcelong!),
+          LatLng(destinationlat!,destinationlong),
         ];
         _markers.clear();
         for (int i = 0; i < latlng.length; i++) {
@@ -184,11 +186,11 @@ class _MyHomePageState extends State<MyHomePage> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (BuildContext context) => Transit1(),
+                      builder: (BuildContext context) => TicketingApp(),
                     ),
                   );
                 },
-                child: Text("Choose best transit options"),
+                child: Text("Confrim Route"),
               ),
             ),
           ],

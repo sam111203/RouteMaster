@@ -44,6 +44,10 @@ dependencies:
   http: ^0.13.6
   uuid: ^4.3.3
   google_maps_routes: ^1.1.2
+  upi_india: ^3.0.1
+  #flutter_stripe_payment: ^0.0.18
+  #stripe_sdk: ^5.0.0-nullsafety.1
+  url_launcher: ^6.2.5
 
 dev_dependencies:
   flutter_test:

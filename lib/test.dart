@@ -1,7 +1,9 @@
 import 'package:authentication/prehomepage.dart';
+import 'package:authentication/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'routes.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 int selectedIndex = 0;
 String apiKey1 = 'AIzaSyDm-MaPLtStPAEPLi-nQ2_DAgh24BRGH14';
@@ -10,6 +12,7 @@ List<dynamic> busStations = [];
 List<dynamic> trainStations = [];
 String tS = '';
 String bS = '';
+String transitOptionsDescription = '';
 
 class Transit1 extends StatefulWidget {
   const Transit1({super.key});
@@ -30,7 +33,7 @@ class _Transit1State extends State<Transit1> {
     else if(selectedIndex==2)
       getNearbyTrainStations();
     else if(selectedIndex==3) {
-      //getTransitOptions();
+      getTransitOptions();
     }
   }
   @override
@@ -123,6 +126,20 @@ class _Transit1State extends State<Transit1> {
                   ),
                 ),
               ),
+            Padding(
+              padding: EdgeInsets.only(right:10),
+              child: ElevatedButton(
+                onPressed: (){
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (BuildContext context) => RouteDisplay(),
+                    ),
+                  );
+                }, child: Text('Navigate'),
+              ),
+
+            ),
           ],
         ),
 
@@ -157,4 +174,49 @@ class _Transit1State extends State<Transit1> {
       print('Failed to get nearest bus station: ${response.statusCode}');
     }
   }
+  void getTransitOptions() async {
+    var url = Uri.parse(
+        'https://maps.googleapis.com/maps/api/directions/json?origin=$sourcelat,$sourcelong&destination=$destinationlat,$destinationlong&mode=transit&key=$apiKey1');
+    var response = await http.get(url);
+    if (response.statusCode == 200) {
+      var data = jsonDecode(response.body.toString());
+      var routes = data['routes'];
+      if (routes.isNotEmpty) {
+        var legs = routes[0]['legs'];
+        var transitSteps = legs[0]['steps'];
+        var transitDescription = '';
+        transitSteps.forEach((step) {
+          if (step['travel_mode'] == 'TRANSIT') {
+            var transitDetails = step['transit_details'];
+            var transitMode = transitDetails?['line']?['vehicle']?['type'];
+            if (transitMode == 'BUS' || transitMode == 'RAIL') {
+              var line = transitDetails?['line'];
+              var departureStop = transitDetails?['departure_stop'];
+              var arrivalStop = transitDetails?['arrival_stop'];
+              if (line != null && departureStop != null && arrivalStop != null) {
+                transitDescription += line['name'] ?? '';
+                transitDescription += departureStop['name'] ?? '';
+                transitDescription += ' to ';
+                transitDescription += arrivalStop['name'] ?? '';
+                transitDescription += '\n';
+              }
+            }
+          }
+        });
+        setState(() {
+          transitOptionsDescription =
+          transitDescription.isNotEmpty ? transitDescription : 'No bus or train transit options found';
+        });
+      } else {
+        setState(() {
+          transitOptionsDescription = 'No transit options found';
+        });
+      }
+    } else {
+      setState(() {
+        transitOptionsDescription = 'Failed to get transit options: ${response.statusCode}';
+      });
+    }
+  }
+
 }
