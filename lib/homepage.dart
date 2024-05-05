@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'prehomepage.dart';
 import 'package:authentication/test.dart';
 import 'package:flutter/material.dart';
@@ -23,11 +23,13 @@ class _MyHomePageState extends State<MyHomePage> {
   Completer<GoogleMapController> _controller = Completer();
 
   CameraPosition _kGooglePlex =
-  CameraPosition(target: LatLng(sourcelat, sourcelong,), zoom:14 );
+      CameraPosition(target: LatLng(sourcelat, sourcelong), zoom: 14);
 
   final Set<Marker> _markers = {};
   final Set<Polyline> _polyline = {};
   Map<PolylineId, Polyline> polylines = {};
+
+  bool _isSatelliteView = false; // Track if satellite view is enabled
 
   Future<Position> _getCurrentLocation() async {
     servicePermission = await Geolocator.isLocationServiceEnabled();
@@ -39,13 +41,17 @@ class _MyHomePageState extends State<MyHomePage> {
       permission = await Geolocator.requestPermission();
     }
 
-    return await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+    return await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high);
   }
 
-  Future<void> _getPolylineCoordinates(LatLng origin, LatLng destination) async {
-    String apiKey = 'AIzaSyDm-MaPLtStPAEPLi-nQ2_DAgh24BRGH14'; // Replace with your actual API key
+  Future<void> _getPolylineCoordinates(
+      LatLng origin, LatLng destination) async {
+    String apiKey =
+        'AIzaSyDm-MaPLtStPAEPLi-nQ2_DAgh24BRGH14'; // Replace with your actual API key
     String url =
-        'https://maps.googleapis.com/maps/api/directions/json?origin=${origin.latitude},${origin.longitude}&destination=${destination.latitude},${destination.longitude}&travel_mode=transit&key=$apiKey';
+        'https://maps.googleapis.com/maps/api/directions/json?origin=${origin.latitude},${origin.longitude}&destination=${destination.latitude},${destination.longitude}&key=$apiKey';
+
     final response = await http.get(Uri.parse(url));
 
     if (response.statusCode == 200) {
@@ -67,8 +73,8 @@ class _MyHomePageState extends State<MyHomePage> {
           Polyline(
             polylineId: PolylineId("1"),
             points: polylineCoordinates,
-            color: Colors.purple,
-            width: 3,
+            color: Colors.blue,
+            width: 10,
           ),
         );
       });
@@ -160,13 +166,18 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
+  void _toggleMapStyle() {
+    setState(() {
+      _isSatelliteView = !_isSatelliteView;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: Scaffold(
         appBar: AppBar(
-
           leading: IconButton(
             onPressed: () {
               Navigator.pushReplacement(
@@ -192,6 +203,12 @@ class _MyHomePageState extends State<MyHomePage> {
                 child: Text("Choose best transit options"),
               ),
             ),
+            IconButton(
+              onPressed: _toggleMapStyle,
+              icon: Icon(_isSatelliteView
+                  ? Icons.map_outlined
+                  : Icons.satellite_outlined),
+            ),
           ],
         ),
         body: GoogleMap(
@@ -202,7 +219,7 @@ class _MyHomePageState extends State<MyHomePage> {
           myLocationEnabled: true,
           polylines: _polyline,
           initialCameraPosition: _kGooglePlex,
-          mapType: MapType.normal,
+          mapType: _isSatelliteView ? MapType.satellite : MapType.normal,
         ),
       ),
     );
