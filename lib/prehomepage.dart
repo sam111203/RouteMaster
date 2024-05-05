@@ -1,10 +1,14 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:uuid/uuid.dart';
 import 'homepage.dart';
 import 'package:http/http.dart' as http;
-
+import 'feedback.dart';
+TextEditingController _controller1 = TextEditingController();
+TextEditingController _controller2 = TextEditingController();
+String dest ='';
 final String apiKey = 'AIzaSyDm-MaPLtStPAEPLi-nQ2_DAgh24BRGH14';
 double sourcelat = 0.0,sourcelong=0.0,destinationlat=0.0,destinationlong=0.0;
 class HomePage extends StatefulWidget {
@@ -15,8 +19,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  TextEditingController _controller1 = TextEditingController();
-  TextEditingController _controller2 = TextEditingController();
+
   var uuid = Uuid();
   String _sessionToken = '12';
   String _sessionToken1 = '34';
@@ -114,6 +117,12 @@ class _HomePageState extends State<HomePage> {
     setState(() {
       _selectedIndex = index;
     });
+    if(_selectedIndex==2){
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) =>  FeedbackSender()),
+      );
+    }
   }
 
   @override
@@ -122,6 +131,15 @@ class _HomePageState extends State<HomePage> {
       debugShowCheckedModeBanner: false,
       home: Scaffold(
         appBar: AppBar(
+          actions: [
+            IconButton(onPressed: (){
+              launchUrl(Uri.parse('tel:102'));
+             }, icon: Image.asset('assets/healthcare.png',  // Path to your custom icon image
+                 width: 70,  // Adjust width as needed
+                 height: 80,  // Adjust height as needed
+                  ),
+            ),
+                 ],
           backgroundColor: Colors.deepPurple[400],
           title: Text(
             'RouteMaster',
@@ -220,6 +238,7 @@ class _HomePageState extends State<HomePage> {
                     _controller2.text.isNotEmpty) {
                   print(_controller1.text);
                   print(_controller2.text);
+                 dest= _controller2!.text;
                   Navigator.push(
                     context,
                     MaterialPageRoute(
@@ -267,7 +286,7 @@ class _HomePageState extends State<HomePage> {
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.settings),
-              label: 'Settings',
+              label: 'Feedback',
             ),
           ],
           selectedItemColor: Colors.deepPurple,

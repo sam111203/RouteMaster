@@ -1,18 +1,22 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:authentication/ticketing.dart';
-
 import 'prehomepage.dart';
-import 'package:authentication/test.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
-
-Position? _currentLocation;
+import 'package:uuid/uuid.dart';
+import 'test.dart';
+import 'package:geocoding/geocoding.dart';
 late bool servicePermission = false;
 late LocationPermission permission;
-
+double buslat=0.0,buslong=0.0;
+var uuid1 = Uuid();
+String _sessionToken1 = '67';
+List<dynamic> _placesList2 = [];
+Position? _currentLocation;
+bool showListView = false;// Flag to control the visibility of ListView.builder
 class RouteDisplay extends StatefulWidget {
   const RouteDisplay({Key? key}) : super(key: key);
 
@@ -21,6 +25,45 @@ class RouteDisplay extends StatefulWidget {
 }
 
 class _RouteDisplayState extends State<RouteDisplay> {
+  @override
+
+  void onChange() {
+    if (_sessionToken1 == null) {
+      setState(() {
+        _sessionToken1 = uuid1.v4();
+      });
+    }
+    if(selectedIndex!=0&&selectedIndex==1)
+     getSuggestion(bS!);
+    else if(selectedIndex!=0&&selectedIndex==2)
+      getSuggestion(tS!);
+
+  }
+  void getSuggestion(String input) async {
+    String baseURL =
+        'https://maps.googleapis.com/maps/api/place/autocomplete/json';
+    String request =
+        '$baseURL?input=$input&key=$apiKey&sessiontoken=$_sessionToken1';
+
+    var response = await http.get(Uri.parse(request));
+    var data = response.body.toString();
+    print('data');
+    print(data);
+    print(response.body.toString());
+    if (response.statusCode == 200) {
+      setState(() async{
+        _placesList2 = jsonDecode(response.body.toString())['predictions'];
+        List<Location> locations1 = await locationFromAddress(_placesList2[0] ['description']);
+        buslat = locations1.last.latitude;
+        print(buslat);
+        buslong = locations1.last.longitude;
+        print(buslong);
+        showListView = true; // Show ListView.builder when suggestions are loaded
+      });
+    } else {
+      throw Exception('Failed to load data');
+    }
+  }
   Completer<GoogleMapController> _controller = Completer();
 
   CameraPosition _kGooglePlex =
@@ -120,14 +163,15 @@ class _RouteDisplayState extends State<RouteDisplay> {
     _getCurrentLocation().then((position) {
       setState(() {
         _currentLocation = position;
-
+        onChange();
         _kGooglePlex = CameraPosition(
           target: LatLng(position.latitude, position.longitude),
           zoom: 14,
         );
+
         latlng = [
           LatLng(sourcelat!,sourcelong!),
-          LatLng(destinationlat!,destinationlong),
+          LatLng(buslat!,buslong!),
         ];
         _markers.clear();
         for (int i = 0; i < latlng.length; i++) {
@@ -170,12 +214,7 @@ class _RouteDisplayState extends State<RouteDisplay> {
         appBar: AppBar(
           leading: IconButton(
             onPressed: () {
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(
-                  builder: (BuildContext context) => HomePage(),
-                ),
-              );
+              Navigator.pop(context);
             },
             icon: Icon(Icons.arrow_circle_left_outlined),
           ),
@@ -190,7 +229,7 @@ class _RouteDisplayState extends State<RouteDisplay> {
                     ),
                   );
                 },
-                child: Text("Confrim Route"),
+                child: Text("Confirm Route"),
               ),
             ),
           ],

@@ -1,7 +1,8 @@
+import 'package:authentication/test.dart';
 import 'package:flutter/material.dart';
 import 'package:upi_india/upi_india.dart';
 //import 'package:flutter_stripe_payment/flutter_stripe_payment.dart';
-
+import 'prehomepage.dart';
 void main() {
   runApp(TicketingApp());
 }
@@ -107,7 +108,8 @@ class _BusTicketBookingScreenState extends State<BusTicketBookingScreen> {
               ),
               child: TextField(
                 decoration: InputDecoration(
-                  hintText: 'Source',
+                  hintText: bS!,
+                  enabled: false,
                   border: InputBorder.none,
                   icon: Icon(Icons.location_on),
                 ),
@@ -122,7 +124,8 @@ class _BusTicketBookingScreenState extends State<BusTicketBookingScreen> {
               ),
               child: TextField(
                 decoration: InputDecoration(
-                  hintText: 'Destination',
+                  hintText: dest!,
+                  enabled: false,
                   border: InputBorder.none,
                   icon: Icon(Icons.location_on),
                 ),
@@ -273,7 +276,8 @@ class _TrainTicketBookingScreenState extends State<TrainTicketBookingScreen> {
               ),
               child: TextField(
                 decoration: InputDecoration(
-                  hintText: 'Source',
+                  hintText: tS!,
+                  enabled: false,
                   border: InputBorder.none,
                   icon: Icon(Icons.location_on),
                 ),
@@ -288,7 +292,8 @@ class _TrainTicketBookingScreenState extends State<TrainTicketBookingScreen> {
               ),
               child: TextField(
                 decoration: InputDecoration(
-                  hintText: 'Destination',
+                  hintText: dest!,
+                  enabled: false,
                   border: InputBorder.none,
                   icon: Icon(Icons.location_on),
                 ),
