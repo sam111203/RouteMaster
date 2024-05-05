@@ -156,7 +156,7 @@ class _Transit1State extends State<Transit1> {
         // print(tS);
       });
     } else {
-      bS= 'No nearby Train Stations';
+      tS= 'No nearby Train Stations';
       print('Failed to get nearest train station: ${response.statusCode}');
     }
   }
